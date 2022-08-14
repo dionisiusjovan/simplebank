@@ -25,4 +25,7 @@ sqlcgenerate:
 test:
 	go test -v -cover ./...
 
-.PHONY: postgres12 createdb dropdb migrateup migratedown sqlcversion sqlcinit sqlcversion
+server:
+	go run main.go
+
+.PHONY: postgres12 createdb dropdb migrateup migratedown sqlcversion sqlcinit sqlcversion server
