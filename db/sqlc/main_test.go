@@ -16,11 +16,6 @@ var testDB *sql.DB
 func TestMain(m *testing.M) {
 	var err error
 
-	// for windows
-	// wd, _ := os.Getwd()
-	// config, err := util.LoadConfig(wd + "\\..\\..")
-
-	// for unix
 	config, err := util.LoadConfig("../..")
 	if err != nil {
 		log.Fatal("cannot load config:", err)

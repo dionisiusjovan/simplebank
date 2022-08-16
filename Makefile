@@ -8,10 +8,10 @@ dropdb:
 	docker exec -it postgres12 dropdb simple_bank
 
 migrateup:
-	migrate -path D:/Go-code/simplebank/db/migration/ -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
+	migrate -path D:/Go-code/src/simplebank/db/migration/ -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path D:/Go-code/simplebank/db/migration/ -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
+	migrate -path D:/Go-code/src/simplebank/db/migration/ -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
 
 sqlcversion:
 	docker run --rm -v "%cd%:/src" -w /src kjconroy/sqlc version
@@ -28,4 +28,7 @@ test:
 server:
 	go run main.go
 
-.PHONY: postgres12 createdb dropdb migrateup migratedown sqlcversion sqlcinit sqlcversion server
+mock:
+	mockgen -package mockdb -destination db/mock/store.go simplebank/db/sqlc Store
+
+.PHONY: postgres12 createdb dropdb migrateup migratedown sqlcversion sqlcinit sqlcversion server mock
