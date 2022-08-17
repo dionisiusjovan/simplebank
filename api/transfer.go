@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	db "simplebank/db/sqlc"
 
@@ -9,15 +10,23 @@ import (
 )
 
 type transferTxRequest struct {
-	SrcAccount int64 `json:"src_account" binding:"required"`
-	DstAccount int64 `json:"dst_account" binding:"required"`
-	Amount     int64 `json:"amount" binding:"required,min=1"`
+	SrcAccount int64  `json:"src_account" binding:"required,min=1"`
+	DstAccount int64  `json:"dst_account" binding:"required,min=1"`
+	Amount     int64  `json:"amount" binding:"required,gt=0"`
+	Currency   string `json:"currency" binding:"required,currency"`
 }
 
 func (server *Server) transferTx(ctx *gin.Context) {
 	var req transferTxRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if !server.validAccount(ctx, req.SrcAccount, req.Currency) {
+		return
+	}
+	if !server.validAccount(ctx, req.DstAccount, req.Currency) {
 		return
 	}
 
@@ -34,6 +43,25 @@ func (server *Server) transferTx(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, transfer)
+}
+
+func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) bool {
+	account, err := server.store.GetAccount(ctx, accountID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return false
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return false
+	}
+
+	if account.Currency != currency {
+		err := fmt.Errorf("account [%d] currency mismatch: %s to %s", accountID, account.Currency, currency)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return false
+	}
+	return true
 }
 
 type getTransferRequest struct {
