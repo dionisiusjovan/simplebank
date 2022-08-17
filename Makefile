@@ -13,6 +13,12 @@ migrateup:
 migratedown:
 	migrate -path D:/Go-code/src/simplebank/db/migration/ -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
 
+migrateup1:
+	migrate -path D:/Go-code/src/simplebank/db/migration/ -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
+
+migratedown1:
+	migrate -path D:/Go-code/src/simplebank/db/migration/ -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
+
 sqlcversion:
 	docker run --rm -v "%cd%:/src" -w /src kjconroy/sqlc version
 
